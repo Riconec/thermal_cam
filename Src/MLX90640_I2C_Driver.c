@@ -16,7 +16,7 @@
  */
 #include "MLX90640_I2C_Driver.h"
 #include "stm32f1xx_hal.h"
-#define MAX_BURST_IO 120u
+
 extern I2C_HandleTypeDef hi2c1;
 
 void MLX90640_I2CInit()
