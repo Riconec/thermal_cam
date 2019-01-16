@@ -19,9 +19,12 @@
 
 #include <stdint.h>
 
-#define MAX_BURST_IO 768u
+#define MAX_BURST_IO 1u
 
 void MLX90640_I2CInit(void);
+int I2C_ReadBurst(uint8_t i2cAddr, uint16_t memAddr, uint16_t* dataBuf);
+uint16_t MLX90640_I2CReadWord(uint8_t slave_address, uint16_t start_address);
+void convertBytesToWords(uint16_t * sourceArray, uint16_t arraySize);
 int MLX90640_I2CRead(uint8_t slaveAddr,uint16_t startAddress, uint16_t nMemAddressRead, uint16_t *data);
 int MLX90640_I2CWrite(uint8_t slaveAddr,uint16_t writeAddress, uint16_t data);
 void MLX90640_I2CFreqSet(int freq);

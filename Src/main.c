@@ -10,7 +10,7 @@
   * inserted by the user or by software development tools
   * are owned by their respective copyright owners.
   *
-  * Copyright (c) 2018 STMicroelectronics International N.V. 
+  * Copyright (c) 2019 STMicroelectronics International N.V. 
   * All rights reserved.
   *
   * Redistribution and use in source and binary forms, with or without 
@@ -53,13 +53,25 @@
 
 /* USER CODE BEGIN Includes */
 #include "MLX90640_I2C_Driver.h"
+#include "MLX90640_API.h"
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
-I2C_HandleTypeDef hi2c1;
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
+#define I2C_ADDR 0x33u*2
+#define TA_SHIFT 8
+#define EE_WORDS_NUM 832u
+#define TO_WORDS_NUM 768u
+#define FR_WORDS_NUM 834u
+
+uint16_t eeMLX90640[EE_WORDS_NUM];
+uint16_t mlx90640FrameOne[FR_WORDS_NUM];
+//uint16_t mlx90640FrameTwo[834];
+float mlx90640ToOne[TO_WORDS_NUM];
+//float mlx90640ToTwo[768];
+paramsMLX90640 parMLX90640;
 
 /* USER CODE END PV */
 
@@ -110,54 +122,34 @@ int main(void)
   MX_USB_DEVICE_Init();
   /* USER CODE BEGIN 2 */
 
-	HAL_Delay(10u);
+  #if 0
+  volatile int32_t status = 0;
+  MLX90640_SetRefreshRate(I2C_ADDR, 0x00);
+
+  status = MLX90640_DumpEE(I2C_ADDR, eeMLX90640);
+	//convertBytesToWords(eeMLX90640, EE_WORDS_NUM);
+
+  status = MLX90640_ExtractParameters(eeMLX90640, &parMLX90640);
 	
-	uint16_t i2cDataSingle[128u];
-	uint16_t i2cDataDual[128u];
-	uint16_t i2cDataBurst[128u];
+	for (uint8_t i = 0u; i < 2u; i++){
+		status = MLX90640_GetFrameData(I2C_ADDR, mlx90640FrameOne);
+		//convertBytesToWords(mlx90640FrameOne, FR_WORDS_NUM);
 	
-	volatile uint16_t * single = i2cDataSingle;
-	volatile uint16_t * dual = i2cDataDual;
-	volatile uint16_t * burst = i2cDataBurst;
-	
-	
-	volatile uint8_t * bytePtr;
-	
-	bytePtr = (uint8_t*)burst;
-	bytePtr++;
-	
-	//uint16_t rrors = 0u;
-	volatile uint16_t dualErrors = 0u;
-	volatile uint16_t burstErrors = 0u;
-	
-	//HAL_I2C_Mem_Read(&hi2c1, 0x66u, 0x2400u, 0x2u, i2cData, 100u, 1000);
-  //HAL_Delay(100u);
-	//static uint16_t dumpArray[128u];
-	
-	MLX90640_I2CRead(0x66u, 0x2407u, 100u, i2cDataBurst);
-	HAL_Delay(10u);
-	
-	for (int i = 0; i <= 100; i += 2) {
-		MLX90640_I2CRead(0x66u, (0x2407u + i), 4u, i2cDataDual + i);
-		//HAL_Delay(10u);
+		volatile float tr = MLX90640_GetTa(mlx90640FrameOne, &parMLX90640) - TA_SHIFT;
+		MLX90640_CalculateTo(mlx90640FrameOne, &parMLX90640, 0.95, tr, mlx90640ToOne);
 	}
-	//MLX90640_I2CRead(0x66u, 0x2407u, 4u, i2cDataDual);
-	HAL_Delay(10u);
-	
-	for (int i = 0; i <= 100; i += 1) {
-		MLX90640_I2CRead(0x66u, 0x2407u + i, 2u, i2cDataSingle + i);
-		//HAL_Delay(10u);
-	}
-	
-	for (int i = 0; i <= 100; i++) {
-		if(i2cDataDual[i] != i2cDataSingle[i]){
-			dualErrors++;
-		}
-		
-		if(i2cDataBurst[i] != i2cDataSingle[i]){
-			burstErrors++;
-		}
-	}
+  #endif
+  volatile uint16_t databuffer[10u];
+
+  databuffer[0] = MLX90640_I2CReadWord(I2C_ADDR, 0x2407u);
+  databuffer[1] = MLX90640_I2CReadWord(I2C_ADDR, 0x2408u);
+  databuffer[2] = MLX90640_I2CReadWord(I2C_ADDR, 0x2409u);
+
+  //volatile int ret = I2C_ReadBurst(0x33u, 0x2407, &databuffer[0]);
+
+  //ret = I2C_ReadBurst(0x33u, 0x2408, &databuffer[1]);
+
+  //ret = I2C_ReadBurst(0x33u, 0x2409, &databuffer[2]);
 
   /* USER CODE END 2 */
 
@@ -237,19 +229,42 @@ void SystemClock_Config(void)
 static void MX_I2C1_Init(void)
 {
 
-  hi2c1.Instance = I2C1;
-  hi2c1.Init.ClockSpeed = 400000;
-  hi2c1.Init.DutyCycle = I2C_DUTYCYCLE_2;
-  hi2c1.Init.OwnAddress1 = 0;
-  hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
-  hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
-  hi2c1.Init.OwnAddress2 = 0;
-  hi2c1.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
-  hi2c1.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
-  if (HAL_I2C_Init(&hi2c1) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
+  LL_I2C_InitTypeDef I2C_InitStruct;
+
+  LL_GPIO_InitTypeDef GPIO_InitStruct;
+
+  /**I2C1 GPIO Configuration  
+  PB8   ------> I2C1_SCL
+  PB9   ------> I2C1_SDA 
+  */
+  GPIO_InitStruct.Pin = LL_GPIO_PIN_8|LL_GPIO_PIN_9;
+  GPIO_InitStruct.Mode = LL_GPIO_MODE_ALTERNATE;
+  GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_HIGH;
+  GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_OPENDRAIN;
+  LL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  LL_GPIO_AF_EnableRemap_I2C1();
+
+  /* Peripheral clock enable */
+  LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_I2C1);
+
+    /**I2C Initialization 
+    */
+  LL_I2C_DisableOwnAddress2(I2C1);
+
+  LL_I2C_DisableGeneralCall(I2C1);
+
+  LL_I2C_EnableClockStretching(I2C1);
+
+  I2C_InitStruct.PeripheralMode = LL_I2C_MODE_I2C;
+  I2C_InitStruct.ClockSpeed = 400000;
+  I2C_InitStruct.DutyCycle = LL_I2C_DUTYCYCLE_2;
+  I2C_InitStruct.OwnAddress1 = 0;
+  I2C_InitStruct.TypeAcknowledge = LL_I2C_ACK;
+  I2C_InitStruct.OwnAddrSize = LL_I2C_OWNADDRESS1_7BIT;
+  LL_I2C_Init(I2C1, &I2C_InitStruct);
+
+  LL_I2C_SetOwnAddress2(I2C1, 0);
 
 }
 

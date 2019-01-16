@@ -35,7 +35,7 @@ int ExtractDeviatingPixels(uint16_t *eeData, paramsMLX90640 *mlx90640);
 int CheckAdjacentPixels(uint16_t pix1, uint16_t pix2);
 int CheckEEPROMValid(uint16_t *eeData);  
 float GetMedian(float *values, int n);
-int IsPixelBad(uint16_t pixel,paramsMLX90640 *params);
+int IsPixelBad(uint16_t pixel, paramsMLX90640 *params);
 
   
 int MLX90640_DumpEE(uint8_t slaveAddr, uint16_t *eeData)
