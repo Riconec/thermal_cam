@@ -1,10 +1,9 @@
 /**
   ******************************************************************************
-  * @file           : usbd_cdc_if.h
-  * @version        : v2.0_Cube
-  * @brief          : Header for usbd_cdc_if.c file.
+  * @file    stm32_assert.h
+  * @brief   STM32 assert file.
   ******************************************************************************
-  * This notice applies to any and all portions of this file
+   * This notice applies to any and all portions of this file
   * that are not between comment pairs USER CODE BEGIN and
   * USER CODE END. Other portions of this file, whether 
   * inserted by the user or by software development tools
@@ -48,111 +47,37 @@
   */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __USBD_CDC_IF_H__
-#define __USBD_CDC_IF_H__
+#ifndef __STM32_ASSERT_H
+#define __STM32_ASSERT_H
 
 #ifdef __cplusplus
  extern "C" {
 #endif
 
+/* Exported types ------------------------------------------------------------*/
+/* Exported constants --------------------------------------------------------*/
 /* Includes ------------------------------------------------------------------*/
-#include "usbd_cdc.h"
-
-/* USER CODE BEGIN INCLUDE */
-
-/* USER CODE END INCLUDE */
-
-/** @addtogroup STM32_USB_OTG_DEVICE_LIBRARY
-  * @brief For Usb device.
-  * @{
-  */
-  
-/** @defgroup USBD_CDC_IF USBD_CDC_IF
-  * @brief Usb VCP device module
-  * @{
-  */ 
-
-/** @defgroup USBD_CDC_IF_Exported_Defines USBD_CDC_IF_Exported_Defines
-  * @brief Defines.
-  * @{
-  */
-/* USER CODE BEGIN EXPORTED_DEFINES */
-
-/* USER CODE END EXPORTED_DEFINES */
-
+/* Exported macro ------------------------------------------------------------*/
+#ifdef  USE_FULL_ASSERT
 /**
-  * @}
+  * @brief  The assert_param macro is used for function's parameters check.
+  * @param  expr: If expr is false, it calls assert_failed function
+  *         which reports the name of the source file and the source
+  *         line number of the call that failed.
+  *         If expr is true, it returns no value.
+  * @retval None
   */
-
-/** @defgroup USBD_CDC_IF_Exported_Types USBD_CDC_IF_Exported_Types
-  * @brief Types.
-  * @{
-  */
-
-/* USER CODE BEGIN EXPORTED_TYPES */
-
-/* USER CODE END EXPORTED_TYPES */
-
-/**
-  * @}
-  */
-
-/** @defgroup USBD_CDC_IF_Exported_Macros USBD_CDC_IF_Exported_Macros
-  * @brief Aliases.
-  * @{
-  */
-
-/* USER CODE BEGIN EXPORTED_MACRO */
-
-/* USER CODE END EXPORTED_MACRO */
-
-/**
-  * @}
-  */
-
-/** @defgroup USBD_CDC_IF_Exported_Variables USBD_CDC_IF_Exported_Variables
-  * @brief Public variables.
-  * @{
-  */
-
-/** CDC Interface callback. */
-extern USBD_CDC_ItfTypeDef USBD_Interface_fops_FS;
-
-/* USER CODE BEGIN EXPORTED_VARIABLES */
-
-/* USER CODE END EXPORTED_VARIABLES */
-
-/**
-  * @}
-  */
-
-/** @defgroup USBD_CDC_IF_Exported_FunctionsPrototype USBD_CDC_IF_Exported_FunctionsPrototype
-  * @brief Public functions declaration.
-  * @{
-  */
-
-uint8_t CDC_Transmit_FS(uint8_t* Buf, uint16_t Len);
-
-/* USER CODE BEGIN EXPORTED_FUNCTIONS */
-
-/* USER CODE END EXPORTED_FUNCTIONS */
-
-/**
-  * @}
-  */
-
-/**
-  * @}
-  */
-
-/**
-  * @}
-  */
+  #define assert_param(expr) ((expr) ? (void)0U : assert_failed((uint8_t *)__FILE__, __LINE__))
+/* Exported functions ------------------------------------------------------- */
+  void assert_failed(uint8_t* file, uint32_t line);
+#else
+  #define assert_param(expr) ((void)0U)
+#endif /* USE_FULL_ASSERT */
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __USBD_CDC_IF_H__ */
+#endif /* __STM32_ASSERT_H */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

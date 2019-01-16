@@ -10,7 +10,7 @@
   * inserted by the user or by software development tools
   * are owned by their respective copyright owners.
   *
-  * Copyright (c) 2018 STMicroelectronics International N.V. 
+  * Copyright (c) 2019 STMicroelectronics International N.V. 
   * All rights reserved.
   *
   * Redistribution and use in source and binary forms, with or without 
@@ -52,6 +52,17 @@
 #define __MAIN_H__
 
 /* Includes ------------------------------------------------------------------*/
+#include "stm32f1xx_ll_i2c.h"
+#include "stm32f1xx_ll_bus.h"
+#include "stm32f1xx_ll_cortex.h"
+#include "stm32f1xx_ll_rcc.h"
+#include "stm32f1xx_ll_system.h"
+#include "stm32f1xx_ll_utils.h"
+#include "stm32f1xx_ll_pwr.h"
+#include "stm32f1xx_ll_gpio.h"
+#include "stm32f1xx_ll_dma.h"
+
+#include "stm32f1xx_ll_exti.h"
 
 /* USER CODE BEGIN Includes */
 
