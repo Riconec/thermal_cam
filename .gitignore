@@ -1,2 +1,3 @@
 *.o
 *.d
+MDK-ARM/thermal_camera
